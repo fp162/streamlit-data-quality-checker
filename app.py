@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
+import plotly.express as px
 
 def main():
     st.title("Data Quality Checker")
@@ -91,15 +91,9 @@ def check_columns_with_missing_values(df):
     st.write(columns_with_missing)
 
 def plot_data(df, datetime_column, parameter_column):
-    """Plots the selected parameter against the datetime column"""
-    plt.figure(figsize=(10, 6))
-    plt.plot(df[datetime_column], df[parameter_column], marker='o')
-    plt.xlabel(datetime_column)
-    plt.ylabel(parameter_column)
-    plt.title(f"{parameter_column} over time")
-    plt.xticks(rotation=45)
-    plt.grid(True)
-    st.pyplot(plt)
+    """Plots the selected parameter against the datetime column using Plotly"""
+    fig = px.line(df, x=datetime_column, y=parameter_column, title=f"{parameter_column} over time")
+    st.plotly_chart(fig)
 
 if __name__ == "__main__":
     main()
