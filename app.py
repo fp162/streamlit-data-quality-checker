@@ -106,13 +106,13 @@ def data_plotting_tab():
         # Plotting section
         st.write("### Data Plotting")
         datetime_column = st.selectbox("Select the datetime column", df.columns)
-        
-        # Ensure selected column is datetime type
-        if not pd.api.types.is_datetime64_any_dtype(df[datetime_column]):
-            df[datetime_column] = pd.to_datetime(df[datetime_column], errors='coerce')
-        
+
+        # Ensure selected column is datetime type and drop rows where conversion fails
+        df[datetime_column] = pd.to_datetime(df[datetime_column], errors='coerce')
+        df = df.dropna(subset=[datetime_column])
+
         parameter_column = st.selectbox("Select the parameter column to plot", [col for col in df.columns if col != datetime_column])
-        
+
         # Date range selection
         date_range = st.selectbox("Select date range", ["All", "Last 2 weeks", "Last 1 month", "Last 3 months", "Custom"])
 
