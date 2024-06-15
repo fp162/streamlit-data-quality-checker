@@ -20,30 +20,11 @@ def main():
         st.write("Data Quality Indicators:")
 
         # Data Quality Checks
-        check_nulls(df)
+        check_total_rows(df)
+        check_unique_parameters(df)
+        check_null_percentage(df)
         check_duplicates(df)
         check_data_types(df)
         check_summary_stats(df)
-
-def check_nulls(df):
-    st.write("### Null Values")
-    null_values = df.isnull().sum()
-    st.write(null_values)
-
-def check_duplicates(df):
-    st.write("### Duplicates")
-    duplicates = df.duplicated().sum()
-    st.write(f"Number of duplicate rows: {duplicates}")
-
-def check_data_types(df):
-    st.write("### Data Types")
-    data_types = df.dtypes
-    st.write(data_types)
-
-def check_summary_stats(df):
-    st.write("### Summary Statistics")
-    summary_stats = df.describe()
-    st.write(summary_stats)
-
-if __name__ == "__main__":
-    main()
+        check_unique_values_per_column(df)
+        check_columns_with_missing_values(
