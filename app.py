@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import matplotlib.pyplot as plt
 
 def main():
     st.title("Data Quality Checker")
@@ -27,7 +28,19 @@ def main():
         check_data_types(df)
         check_summary_stats(df)
         check_unique_values_per_column(df)
-        check_columns_with_missing_values(df)  # This line was corrected
+        check_columns_with_missing_values(df)
+
+        # Plotting section
+        st.write("### Data Plotting")
+        datetime_column = st.selectbox("Select the datetime column", df.columns)
+        
+        # Ensure selected column is datetime type
+        if not pd.api.types.is_datetime64_any_dtype(df[datetime_column]):
+            df[datetime_column] = pd.to_datetime(df[datetime_column], errors='coerce')
+        
+        parameter_column = st.selectbox("Select the parameter column to plot", [col for col in df.columns if col != datetime_column])
+        
+        plot_data(df, datetime_column, parameter_column)
 
 def check_total_rows(df):
     """Displays the total number of rows in the dataframe"""
@@ -76,6 +89,17 @@ def check_columns_with_missing_values(df):
     st.write("### Columns with Missing Values")
     columns_with_missing = df.columns[df.isnull().any()].tolist()
     st.write(columns_with_missing)
+
+def plot_data(df, datetime_column, parameter_column):
+    """Plots the selected parameter against the datetime column"""
+    plt.figure(figsize=(10, 6))
+    plt.plot(df[datetime_column], df[parameter_column], marker='o')
+    plt.xlabel(datetime_column)
+    plt.ylabel(parameter_column)
+    plt.title(f"{parameter_column} over time")
+    plt.xticks(rotation=45)
+    plt.grid(True)
+    st.pyplot(plt)
 
 if __name__ == "__main__":
     main()
