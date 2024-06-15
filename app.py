@@ -2,7 +2,14 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-def main():
+st.set_page_config(
+    page_title="Data Quality Checker",
+    page_icon="🔍",
+    layout="wide",
+)
+
+# Function to display the Data Quality tab
+def data_quality_tab():
     st.title("Data Quality Checker")
 
     # File upload
@@ -29,18 +36,6 @@ def main():
         check_summary_stats(df)
         check_unique_values_per_column(df)
         check_columns_with_missing_values(df)
-
-        # Plotting section
-        st.write("### Data Plotting")
-        datetime_column = st.selectbox("Select the datetime column", df.columns)
-        
-        # Ensure selected column is datetime type
-        if not pd.api.types.is_datetime64_any_dtype(df[datetime_column]):
-            df[datetime_column] = pd.to_datetime(df[datetime_column], errors='coerce')
-        
-        parameter_column = st.selectbox("Select the parameter column to plot", [col for col in df.columns if col != datetime_column])
-        
-        plot_data(df, datetime_column, parameter_column)
 
 def check_total_rows(df):
     """Displays the total number of rows in the dataframe"""
@@ -90,10 +85,46 @@ def check_columns_with_missing_values(df):
     columns_with_missing = df.columns[df.isnull().any()].tolist()
     st.write(columns_with_missing)
 
+# Function to display the Data Plotting tab
+def data_plotting_tab():
+    st.title("Data Plotting")
+
+    # File upload
+    uploaded_file = st.file_uploader("Choose a file", type=["csv", "xlsx"])
+
+    if uploaded_file is not None:
+        # Read the file
+        if uploaded_file.name.endswith('.csv'):
+            df = pd.read_csv(uploaded_file)
+        else:
+            df = pd.read_excel(uploaded_file)
+
+        st.write("Data Preview:")
+        st.dataframe(df.head())
+
+        # Plotting section
+        st.write("### Data Plotting")
+        datetime_column = st.selectbox("Select the datetime column", df.columns)
+        
+        # Ensure selected column is datetime type
+        if not pd.api.types.is_datetime64_any_dtype(df[datetime_column]):
+            df[datetime_column] = pd.to_datetime(df[datetime_column], errors='coerce')
+        
+        parameter_column = st.selectbox("Select the parameter column to plot", [col for col in df.columns if col != datetime_column])
+        
+        plot_data(df, datetime_column, parameter_column)
+
 def plot_data(df, datetime_column, parameter_column):
     """Plots the selected parameter against the datetime column using Plotly"""
     fig = px.line(df, x=datetime_column, y=parameter_column, title=f"{parameter_column} over time")
     st.plotly_chart(fig)
 
-if __name__ == "__main__":
-    main()
+# Sidebar for navigation
+st.sidebar.title("Navigation")
+selection = st.sidebar.radio("Go to", ["Data Quality Checker", "Data Plotting"])
+
+# Conditional display of each tab
+if selection == "Data Quality Checker":
+    data_quality_tab()
+elif selection == "Data Plotting":
+    data_plotting_tab()
