@@ -117,33 +117,26 @@ def data_plotting_tab():
         parameter_column = st.selectbox("Select the parameter column to plot", [col for col in df.columns if col != datetime_column])
 
         # Plot the original data
-        plot_data(df, datetime_column, parameter_column)
+        plot_data(df, datetime_column, parameter_column, title="Original Data")
 
         # EWMA settings
         st.write("### EWMA Settings")
-        ewma_param = st.selectbox("Select EWMA parameter", ["Alpha (Smoothing Factor)", "Span", "Center of Mass"])
-        
-        if ewma_param == "Alpha (Smoothing Factor)":
-            alpha = st.slider("Select the smoothing factor (alpha)", min_value=0.01, max_value=1.0, value=0.2)
-            if st.button("Run EWMA"):
-                df['EWMA'] = df[parameter_column].ewm(alpha=alpha, adjust=False).mean()
-                plot_data(df, datetime_column, 'EWMA')
-        
-        elif ewma_param == "Span":
-            span = st.slider("Select the span (number of periods)", min_value=1, max_value=100, value=20)
-            if st.button("Run EWMA"):
-                df['EWMA'] = df[parameter_column].ewm(span=span, adjust=False).mean()
-                plot_data(df, datetime_column, 'EWMA')
-        
-        elif ewma_param == "Center of Mass":
-            center_of_mass = st.slider("Select the center of mass", min_value=0.0, max_value=30.0, value=10.0)
-            if st.button("Run EWMA"):
-                df['EWMA'] = df[parameter_column].ewm(com=center_of_mass, adjust=False).mean()
-                plot_data(df, datetime_column, 'EWMA')
+        alpha = st.slider("Select the smoothing factor (alpha)", min_value=0.01, max_value=1.0, value=0.2)
+        span = st.slider("Select the span (number of periods)", min_value=1, max_value=100, value=20)
+        center_of_mass = st.slider("Select the center of mass", min_value=0.0, max_value=30.0, value=10.0)
 
-def plot_data(df, datetime_column, parameter_column):
+        if st.button("Run EWMA"):
+            df['EWMA'] = df[parameter_column].ewm(alpha=alpha, span=span, com=center_of_mass, adjust=False).mean()
+            plot_combined_data(df, datetime_column, parameter_column, 'EWMA')
+
+def plot_data(df, datetime_column, parameter_column, title="Data"):
     """Plots the selected parameter against the datetime column using Plotly"""
-    fig = px.line(df, x=datetime_column, y=parameter_column, title=f"{parameter_column} over time")
+    fig = px.line(df, x=datetime_column, y=parameter_column, title=f"{title}: {parameter_column} over time")
+    st.plotly_chart(fig)
+
+def plot_combined_data(df, datetime_column, original_column, ewma_column):
+    """Plots the original and EWMA data"""
+    fig = px.line(df, x=datetime_column, y=[original_column, ewma_column], title=f"{original_column} and {ewma_column} over time")
     st.plotly_chart(fig)
 
 # Sidebar for navigation
