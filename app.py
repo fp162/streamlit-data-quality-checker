@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+from datetime import datetime, timedelta
 
 st.set_page_config(
     page_title="Data Quality Checker",
@@ -112,7 +113,26 @@ def data_plotting_tab():
         
         parameter_column = st.selectbox("Select the parameter column to plot", [col for col in df.columns if col != datetime_column])
         
-        plot_data(df, datetime_column, parameter_column)
+        # Date range selection
+        date_range = st.selectbox("Select date range", ["All", "Last 2 weeks", "Last 1 month", "Last 3 months", "Custom"])
+
+        if date_range == "Custom":
+            start_date = st.date_input("From date", value=df[datetime_column].min())
+            end_date = st.date_input("To date", value=df[datetime_column].max())
+        else:
+            end_date = df[datetime_column].max()
+            if date_range == "Last 2 weeks":
+                start_date = end_date - timedelta(weeks=2)
+            elif date_range == "Last 1 month":
+                start_date = end_date - timedelta(days=30)
+            elif date_range == "Last 3 months":
+                start_date = end_date - timedelta(days=90)
+            else:
+                start_date = df[datetime_column].min()
+
+        filtered_df = df[(df[datetime_column] >= pd.to_datetime(start_date)) & (df[datetime_column] <= pd.to_datetime(end_date))]
+
+        plot_data(filtered_df, datetime_column, parameter_column)
 
 def plot_data(df, datetime_column, parameter_column):
     """Plots the selected parameter against the datetime column using Plotly"""
