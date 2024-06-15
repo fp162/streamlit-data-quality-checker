@@ -27,4 +27,55 @@ def main():
         check_data_types(df)
         check_summary_stats(df)
         check_unique_values_per_column(df)
-        check_columns_with_missing_values(
+        check_columns_with_missing_values(df)  # This line was corrected
+
+def check_total_rows(df):
+    """Displays the total number of rows in the dataframe"""
+    st.write("### Total Number of Rows")
+    total_rows = df.shape[0]
+    st.write(f"Total rows: {total_rows}")
+
+def check_unique_parameters(df):
+    """Displays the unique parameter list (column names)"""
+    st.write("### Unique Parameters (Columns)")
+    unique_columns = df.columns.tolist()
+    st.write(unique_columns)
+
+def check_null_percentage(df):
+    """Displays the percentage of null values in each column"""
+    st.write("### Percentage of Null Values")
+    null_percentage = (df.isnull().sum() / len(df)) * 100
+    st.write(null_percentage)
+
+def check_duplicates(df):
+    """Displays the number of duplicate rows"""
+    st.write("### Duplicates")
+    duplicates = df.duplicated().sum()
+    st.write(f"Number of duplicate rows: {duplicates}")
+
+def check_data_types(df):
+    """Displays the data types of each column"""
+    st.write("### Data Types")
+    data_types = df.dtypes
+    st.write(data_types)
+
+def check_summary_stats(df):
+    """Displays summary statistics of the dataframe"""
+    st.write("### Summary Statistics")
+    summary_stats = df.describe()
+    st.write(summary_stats)
+
+def check_unique_values_per_column(df):
+    """Displays the number of unique values per column"""
+    st.write("### Unique Values Per Column")
+    unique_values = df.nunique()
+    st.write(unique_values)
+
+def check_columns_with_missing_values(df):
+    """Displays the number of columns with missing values"""
+    st.write("### Columns with Missing Values")
+    columns_with_missing = df.columns[df.isnull().any()].tolist()
+    st.write(columns_with_missing)
+
+if __name__ == "__main__":
+    main()
