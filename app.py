@@ -71,7 +71,7 @@ def check_data_types(df):
 def check_summary_stats(df):
     """Displays summary statistics of the dataframe"""
     st.write("### Summary Statistics")
-    summary_stats = df.describe()
+    summary_stats = df.describe(include='all', datetime_is_numeric=True)
     st.write(summary_stats)
 
 def check_unique_values_per_column(df):
@@ -110,6 +110,10 @@ def data_plotting_tab():
         # Ensure selected column is datetime type and drop rows where conversion fails
         df[datetime_column] = pd.to_datetime(df[datetime_column], errors='coerce')
         df = df.dropna(subset=[datetime_column])
+
+        # Convert object type columns to strings to avoid serialization issues
+        for col in df.select_dtypes(include=['object']).columns:
+            df[col] = df[col].astype(str)
 
         parameter_column = st.selectbox("Select the parameter column to plot", [col for col in df.columns if col != datetime_column])
 
