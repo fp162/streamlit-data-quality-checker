@@ -121,11 +121,25 @@ def data_plotting_tab():
 
         # EWMA settings
         st.write("### EWMA Settings")
-        alpha = st.slider("Select the smoothing factor (alpha)", min_value=0.01, max_value=1.0, value=0.2)
+        ewma_type = st.radio("Select EWMA Type", options=["Alpha (Smoothing Factor)", "Span", "Center of Mass"])
 
-        if st.button("Run EWMA"):
-            df['EWMA'] = df[parameter_column].ewm(alpha=alpha, adjust=False).mean()
-            plot_combined_data(df, datetime_column, parameter_column, 'EWMA')
+        if ewma_type == "Alpha (Smoothing Factor)":
+            alpha = st.slider("Select the smoothing factor (alpha)", min_value=0.01, max_value=1.0, value=0.2)
+            if st.button("Run EWMA with Alpha"):
+                df['EWMA'] = df[parameter_column].ewm(alpha=alpha, adjust=False).mean()
+                plot_combined_data(df, datetime_column, parameter_column, 'EWMA')
+        
+        elif ewma_type == "Span":
+            span = st.slider("Select the span (number of periods)", min_value=1, max_value=100, value=20)
+            if st.button("Run EWMA with Span"):
+                df['EWMA'] = df[parameter_column].ewm(span=span, adjust=False).mean()
+                plot_combined_data(df, datetime_column, parameter_column, 'EWMA')
+        
+        elif ewma_type == "Center of Mass":
+            center_of_mass = st.slider("Select the center of mass", min_value=0.0, max_value=30.0, value=10.0)
+            if st.button("Run EWMA with Center of Mass"):
+                df['EWMA'] = df[parameter_column].ewm(com=center_of_mass, adjust=False).mean()
+                plot_combined_data(df, datetime_column, parameter_column, 'EWMA')
 
 def plot_data(df, datetime_column, parameter_column, title="Data"):
     """Plots the selected parameter against the datetime column using Plotly"""
