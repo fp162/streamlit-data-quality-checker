@@ -199,9 +199,9 @@ def plot_heatmap(df, datetime_column, parameter_column, title="Heatmap"):
     st.plotly_chart(fig)
 
 def plot_combined_data(df, datetime_column, original_column, ewma_column):
-    fig = px.line(df, x=datetime_column```python
-    , y=[original_column, ewma_column], title=f"{original_column} and {ewma_column} over time")
+    fig = px.line(df, x=datetime_column, y=[original_column, ewma_column], title=f"{original_column} and {ewma_column} over time")
     st.plotly_chart(fig)
+
 
 # Sidebar for navigation
 st.sidebar.title("Navigation")
