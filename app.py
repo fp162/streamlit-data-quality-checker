@@ -121,7 +121,7 @@ def data_plotting_tab():
         st.write("### Data Plotting")
         datetime_column = st.selectbox("Select the datetime column", df.columns)
 
-        df[datetime_column] = pd.to_datetime(df[datetime_column], format="%d-%m-%Y", errors='coerce')
+        df[datetime_column] = pd.to_datetime(df[datetime_column], errors='coerce')
         df = df.dropna(subset=[datetime_column])
 
         for col in df.select_dtypes(include=['object']).columns:
@@ -138,11 +138,11 @@ def data_plotting_tab():
 
         # Custom date range selection
         st.write("### Custom Date Range Selection")
-        custom_start_date = st.date_input("Select start date", value=start_date.date(), min_value=df[datetime_column].min().date(), max_value=df[datetime_column].max().date(), format="DD-MM-YYYY")
-        custom_end_date = st.date_input("Select end date", value=end_date.date(), min_value=custom_start_date, max_value=df[datetime_column].max().date(), format="DD-MM-YYYY")
+        custom_start_date = st.date_input("Select start date", value=start_date.date(), min_value=df[datetime_column].min().date(), max_value=df[datetime_column].max().date())
+        custom_end_date = st.date_input("Select end date", value=end_date.date(), min_value=custom_start_date, max_value=df[datetime_column].max().date())
 
         if st.button("Apply Custom Date Range"):
-            filtered_df = df[(df[datetime_column] >= pd.to_datetime(custom_start_date, format="%d-%m-%Y")) & (df[datetime_column] <= pd.to_datetime(custom_end_date, format="%d-%m-%Y"))]
+            filtered_df = df[(df[datetime_column] >= pd.to_datetime(custom_start_date)) & (df[datetime_column] <= pd.to_datetime(custom_end_date))]
 
         plot_type = st.selectbox("Select Plot Type", ["Line Plot", "Scatter Plot", "Bar Chart", "Histogram", "Heatmap"])
 
@@ -195,15 +195,14 @@ def plot_histogram(df, parameter_column, title="Histogram"):
     st.plotly_chart(fig)
 
 def plot_heatmap(df, datetime_column, parameter_column, title="Heatmap"):
-    fig = px.density_heatmap(df, x=datetime_column, y```python
-    parameter_column, title=f"{title}: {parameter_column} Heatmap")
+    fig = px.density_heatmap(df, x=datetime_column, y=parameter_column, title=f"{title}: {parameter_column} Heatmap")
     st.plotly_chart(fig)
 
 def plot_combined_data(df, datetime_column, original_column, ewma_column):
     fig = px.line(df, x=datetime_column, y=[original_column, ewma_column], title=f"{original_column} and {ewma_column} over time")
     st.plotly_chart(fig)
 
-# Sidebar for navigation
+# Sidebar for navigation```python
 st.sidebar.title("Navigation")
 selection = st.sidebar.radio("Go to", ["Data Quality Checker", "Data Plotting"])
 
