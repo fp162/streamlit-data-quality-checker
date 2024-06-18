@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+from sklearn.ensemble import IsolationForest
 
 st.set_page_config(
     page_title="IoT Data Quality Checker",
@@ -128,18 +129,33 @@ def data_plotting_tab():
 
         parameter_column = st.selectbox("Select the parameter column to plot", [col for col in df.columns if col != datetime_column])
 
+        # Default selection of the latest 30% of data
+        end_date = df[datetime_column].max()
+        start_date = df[datetime_column].quantile(0.7)
+
+        st.write(f"By default, displaying the latest 30% of data from {start_date.date()} to {end_date.date()}")
+        filtered_df = df[(df[datetime_column] >= start_date) & (df[datetime_column] <= end_date)]
+
+        # Custom date range selection
+        st.write("### Custom Date Range Selection")
+        custom_start_date = st.date_input("Select start date", value=start_date.date(), min_value=df[datetime_column].min().date(), max_value=df[datetime_column].max().date())
+        custom_end_date = st.date_input("Select end date", value=end_date.date(), min_value=custom_start_date, max_value=df[datetime_column].max().date())
+
+        if st.button("Apply Custom Date Range"):
+            filtered_df = df[(df[datetime_column] >= pd.to_datetime(custom_start_date)) & (df[datetime_column] <= pd.to_datetime(custom_end_date))]
+
         plot_type = st.selectbox("Select Plot Type", ["Line Plot", "Scatter Plot", "Bar Chart", "Histogram", "Heatmap"])
 
         if plot_type == "Line Plot":
-            plot_data(df, datetime_column, parameter_column, title="Line Plot")
+            plot_data(filtered_df, datetime_column, parameter_column, title="Line Plot")
         elif plot_type == "Scatter Plot":
-            plot_scatter(df, datetime_column, parameter_column, title="Scatter Plot")
+            plot_scatter(filtered_df, datetime_column, parameter_column, title="Scatter Plot")
         elif plot_type == "Bar Chart":
-            plot_bar(df, datetime_column, parameter_column, title="Bar Chart")
+            plot_bar(filtered_df, datetime_column, parameter_column, title="Bar Chart")
         elif plot_type == "Histogram":
-            plot_histogram(df, parameter_column, title="Histogram")
+            plot_histogram(filtered_df, parameter_column, title="Histogram")
         elif plot_type == "Heatmap":
-            plot_heatmap(df, datetime_column, parameter_column, title="Heatmap")
+            plot_heatmap(filtered_df, datetime_column, parameter_column, title="Heatmap")
 
         st.write("### EWMA Settings")
         ewma_type = st.radio("Select EWMA Type", options=["Alpha (Smoothing Factor)", "Span", "Center of Mass"])
@@ -147,20 +163,20 @@ def data_plotting_tab():
         if ewma_type == "Alpha (Smoothing Factor)":
             alpha = st.slider("Select the smoothing factor (alpha)", min_value=0.01, max_value=1.0, value=0.2)
             if st.button("Run EWMA with Alpha"):
-                df['EWMA'] = df[parameter_column].ewm(alpha=alpha, adjust=False).mean()
-                plot_combined_data(df, datetime_column, parameter_column, 'EWMA')
+                filtered_df['EWMA'] = filtered_df[parameter_column].ewm(alpha=alpha, adjust=False).mean()
+                plot_combined_data(filtered_df, datetime_column, parameter_column, 'EWMA')
         
         elif ewma_type == "Span":
             span = st.slider("Select the span (number of periods)", min_value=1, max_value=100, value=20)
             if st.button("Run EWMA with Span"):
-                df['EWMA'] = df[parameter_column].ewm(span=span, adjust=False).mean()
-                plot_combined_data(df, datetime_column, parameter_column, 'EWMA')
+                filtered_df['EWMA'] = filtered_df[parameter_column].ewm(span=span, adjust=False).mean()
+                plot_combined_data(filtered_df, datetime_column, parameter_column, 'EWMA')
         
         elif ewma_type == "Center of Mass":
             center_of_mass = st.slider("Select the center of mass", min_value=0.0, max_value=30.0, value=10.0)
             if st.button("Run EWMA with Center of Mass"):
-                df['EWMA'] = df[parameter_column].ewm(com=center_of_mass, adjust=False).mean()
-                plot_combined_data(df, datetime_column, parameter_column, 'EWMA')
+                filtered_df['EWMA'] = filtered_df[parameter_column].ewm(com=center_of_mass, adjust=False).mean()
+                plot_combined_data(filtered_df, datetime_column, parameter_column, 'EWMA')
 
 def plot_data(df, datetime_column, parameter_column, title="Data"):
     fig = px.line(df, x=datetime_column, y=parameter_column, title=f"{title}: {parameter_column} over time")
@@ -183,7 +199,8 @@ def plot_heatmap(df, datetime_column, parameter_column, title="Heatmap"):
     st.plotly_chart(fig)
 
 def plot_combined_data(df, datetime_column, original_column, ewma_column):
-    fig = px.line(df, x=datetime_column, y=[original_column, ewma_column], title=f"{original_column} and {ewma_column} over time")
+    fig = px.line(df, x=datetime_column```python
+    , y=[original_column, ewma_column], title=f"{original_column} and {ewma_column} over time")
     st.plotly_chart(fig)
 
 # Sidebar for navigation
